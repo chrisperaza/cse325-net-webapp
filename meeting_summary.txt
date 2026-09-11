@@ -2,43 +2,55 @@
 
 Week 02 - 9/10/2026
 
+Group Leader:
+- Christian Pablo Peraza Martinez
+
 Participants:
--
--
--
+- Alejandro Eliseo Valladares Crisanto
+- Arlin Parker Jones
+- Christian Pablo Peraza Martinez
+- Miguel Ignacio Arcos Salazar
+- Nestor Ramiro Otondo
 
 First prayer:
--
+- Nestor Ramiro Otondo
 
 Assignments Challenges:
--
--
+- This is the first time that we all are working with .NET framework. So, firstly is a bit hard to understand the concepts, but we could realize that the assignment maintain the principles about creating a web service and working with the MVC model. We will work together to understand better this framework and each concept.
 
 Brainstorm ideas for team project:
 
--
-    Brief summary:
-    Target audience:
+- Inventory application
+    Brief summary: A simple app to store a quantity of products, with the ability to create, read, update or delete a product
+    Target audience: A business or professionals provider
 
--
-    Brief summary:
-    Target audience:
+- Movie cinema app
+    Brief summary: An app to sell movies tickets, with the ability to list all movies, create, update or delete them
+    Target audience: All families
 
--
-    Brief summary:
-    Target audience:
+- Sales tickets application
+    Brief summary: App to sales tickets of a concert, theater, or stadiums. This app can list the tickets price, create new tickets, update or delete them
+    Target audience: Adults
+
+- Medical appointment app
+    Brief summary: App to make medical appointments to hospital, with the ability to create an appointment, list all appointments, update and delete them
+    Target audience: Adults patients
+
+- Library app
+    Brief summary: An app to rent books tickets, with the ability to list all books in the Library, create, update or delete them
+    Target audience: All kind of readers
+
+- IT assets manager app
+    Brief summary: App to manage all resources of a organization with the ability to register an equipment, list all equipment and their details, update and delete them 
+    Target audience: A business or professionals provider
 
 Repo URL:
--
-
-Assignments (optional):
--
--
+- https://github.com/chrisperaza/cse325-net-webapp
 
 Next meeting leader:
--
+- Miguel Ignacio Arcos Salazar
 
 Last prayer:
--
+- Arlin Parker Jones
 
 ###
