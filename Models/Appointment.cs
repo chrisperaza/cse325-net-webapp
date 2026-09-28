@@ -1,3 +1,6 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace AppointmentBook.Models;
 
 public class Appointment
@@ -6,13 +9,15 @@ public class Appointment
 
   public string Title { get; set; } = string.Empty;
 
-  public DateTime Date { get; set; }
+  public DateOnly Date { get; set; } = DateOnly.FromDateTime(DateTime.Now);
 
-  public TimeSpan Time { get; set; }
+  public TimeOnly StartTime { get; set; } = new TimeOnly(9, 0);
 
-  public string Location { get; set; } = string.Empty;
+  public TimeOnly EndTime { get; set; } = new TimeOnly(10, 0);
 
-  public string Notes { get; set; } = string.Empty;
+  public string? Location { get; set; }
 
-  public bool IsCompleted { get; set; }
+  public string? Notes { get; set; }
+
+  public bool IsCompleted { get; set; } = false;
 }

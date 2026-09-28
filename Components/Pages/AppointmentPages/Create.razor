@@ -1,0 +1,77 @@
+@page "/appointments/create"
+@using Microsoft.EntityFrameworkCore
+@using AppointmentBook.Models
+@inject IDbContextFactory<AppointmentBookDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create</PageTitle>
+
+<h1>Create</h1>
+
+<h2>Appointment</h2>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="Appointment" OnValidSubmit="AddAppointment" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert"/>
+            <div class="mb-3">
+                <label for="title" class="form-label">Title:</label> 
+                <InputText id="title" @bind-Value="Appointment.Title" class="form-control" /> 
+                <ValidationMessage For="() => Appointment.Title" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="date" class="form-label">Date:</label> 
+                <InputDate id="date" @bind-Value="Appointment.Date" class="form-control" /> 
+                <ValidationMessage For="() => Appointment.Date" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="starttime" class="form-label">Start Time:</label>
+                <InputDate Type="InputDateType.Time" id="starttime" @bind-Value="Appointment.StartTime" class="form-control" />
+                <ValidationMessage For="() => Appointment.StartTime" class="text-danger" />
+            </div>
+
+            <div class="mb-3">
+                <label for="endtime" class="form-label">End Time:</label>
+                <InputDate Type="InputDateType.Time" id="endtime" @bind-Value="Appointment.EndTime" class="form-control" />
+                <ValidationMessage For="() => Appointment.EndTime" class="text-danger" />
+            </div>      
+            <div class="mb-3">
+                <label for="location" class="form-label">Location:</label> 
+                <InputText id="location" @bind-Value="Appointment.Location" class="form-control" /> 
+                <ValidationMessage For="() => Appointment.Location" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="notes" class="form-label">Notes:</label> 
+                <InputText id="notes" @bind-Value="Appointment.Notes" class="form-control" /> 
+                <ValidationMessage For="() => Appointment.Notes" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="iscompleted" class="form-label">IsCompleted:</label> 
+                <InputCheckbox id="iscompleted" @bind-Value="Appointment.IsCompleted" class="form-check-input" /> 
+                <ValidationMessage For="() => Appointment.IsCompleted" class="text-danger" /> 
+            </div>        
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/appointments">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private Appointment Appointment { get; set; } = default!;
+
+    protected override void OnInitialized() => Appointment ??= new();
+
+    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task AddAppointment()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Appointment.Add(Appointment);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/appointments");
+    }
+}

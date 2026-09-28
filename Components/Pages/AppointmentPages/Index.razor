@@ -1,0 +1,42 @@
+@page "/appointments"
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using Microsoft.EntityFrameworkCore
+@using AppointmentBook.Models
+@implements IAsyncDisposable
+@inject IDbContextFactory<AppointmentBookDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Index</PageTitle>
+
+<h1>Index</h1>
+
+<p>
+    <a href="appointments/create">Create New</a>
+</p>
+
+<QuickGrid Class="table" Items="context.Appointment">
+    <PropertyColumn Property="appointment => appointment.Title" />
+    <PropertyColumn Property="appointment => appointment.Date" />
+    <PropertyColumn Property="appointment => appointment.StartTime" />
+    <PropertyColumn Property="appointment => appointment.EndTime" />
+    <PropertyColumn Property="appointment => appointment.Location" />
+    <PropertyColumn Property="appointment => appointment.Notes" />
+    <PropertyColumn Property="appointment => appointment.IsCompleted" />
+
+    <TemplateColumn Context="appointment">
+        <a href="@($"appointments/edit?id={appointment.Id}")">Edit</a> |
+        <a href="@($"appointments/details?id={appointment.Id}")">Details</a> |
+        <a href="@($"appointments/delete?id={appointment.Id}")">Delete</a>
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    private AppointmentBookDbContext context = default!;
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}

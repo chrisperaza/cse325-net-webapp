@@ -1,0 +1,58 @@
+@page "/appointments/details"
+@using Microsoft.EntityFrameworkCore
+@using AppointmentBook.Models
+@inject IDbContextFactory<AppointmentBookDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>Appointment</h2>
+    <hr />
+    @if (appointment is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">Title</dt>
+            <dd class="col-sm-10">@appointment.Title</dd>
+            <dt class="col-sm-2">Date</dt>
+            <dd class="col-sm-10">@appointment.Date</dd>
+            <dt class="col-sm-2">StartTime</dt>
+            <dd class="col-sm-10">@appointment.StartTime</dd>
+            <dt class="col-sm-2">EndTime</dt>
+            <dd class="col-sm-10">@appointment.EndTime</dd>
+            <dt class="col-sm-2">Location</dt>
+            <dd class="col-sm-10">@appointment.Location</dd>
+            <dt class="col-sm-2">Notes</dt>
+            <dd class="col-sm-10">@appointment.Notes</dd>
+            <dt class="col-sm-2">IsCompleted</dt>
+            <dd class="col-sm-10">@appointment.IsCompleted</dd>
+        </dl>
+        <div>
+            <a href="@($"/appointments/edit?id={appointment.Id}")">Edit</a> |
+            <a href="@($"/appointments")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private Appointment? appointment;
+
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        appointment = await context.Appointment.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (appointment is null)
+        {
+            NavigationManager.NotFound();
+        }
+    }
+}
