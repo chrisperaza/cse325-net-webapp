@@ -8,7 +8,7 @@
 
 <PageTitle>Index</PageTitle>
 
-<h1>Index</h1>
+<h1>My Appointments</h1>
 
 <p>
     <a href="appointments/create">Create New</a>
@@ -17,11 +17,11 @@
 <QuickGrid Class="table" Items="context.Appointment">
     <PropertyColumn Property="appointment => appointment.Title" />
     <PropertyColumn Property="appointment => appointment.Date" />
-    <PropertyColumn Property="appointment => appointment.StartTime" />
-    <PropertyColumn Property="appointment => appointment.EndTime" />
+    <PropertyColumn Property="appointment => appointment.StartTime" Title="Start Time" />
+    <PropertyColumn Property="appointment => appointment.EndTime" Title="End Time" />
     <PropertyColumn Property="appointment => appointment.Location" />
     <PropertyColumn Property="appointment => appointment.Notes" />
-    <PropertyColumn Property="appointment => appointment.IsCompleted" />
+    <PropertyColumn Property="appointment => appointment.IsCompleted" Title="Is Completed?" />
 
     <TemplateColumn Context="appointment">
         <a href="@($"appointments/edit?id={appointment.Id}")">Edit</a> |
