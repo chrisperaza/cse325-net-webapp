@@ -1,0 +1,91 @@
+@page "/register"
+@layout AuthLayout
+@using System.ComponentModel.DataAnnotations
+@inject IAuthenticationService AuthenticationService
+
+<PageTitle>Create account | Appointment Book</PageTitle>
+
+<div class="auth-heading">
+    <p class="form-eyebrow">Get started</p>
+    <h2>Create your account</h2>
+    <p>A few details now, then your appointments have a home.</p>
+</div>
+
+<EditForm Model="_form" OnValidSubmit="RegisterAsync" FormName="register-form" class="auth-form">
+    <DataAnnotationsValidator />
+
+    <div class="field-group">
+        <label for="register-name">Your name</label>
+        <InputText id="register-name" class="form-control" @bind-Value="_form.Name" autocomplete="name" placeholder="Jamie Lee" />
+        <ValidationMessage For="() => _form.Name" />
+    </div>
+
+    <div class="field-group">
+        <label for="register-email">Email address</label>
+        <InputText id="register-email" class="form-control" @bind-Value="_form.Email" type="email" autocomplete="email" placeholder="you@example.com" />
+        <ValidationMessage For="() => _form.Email" />
+    </div>
+
+    <div class="field-group">
+        <label for="register-password">Password</label>
+        <InputText id="register-password" class="form-control" @bind-Value="_form.Password" type="password" autocomplete="new-password" placeholder="At least 8 characters" />
+        <ValidationMessage For="() => _form.Password" />
+    </div>
+
+    <div class="field-group">
+        <label for="register-confirm-password">Confirm password</label>
+        <InputText id="register-confirm-password" class="form-control" @bind-Value="_form.ConfirmPassword" type="password" autocomplete="new-password" placeholder="Enter it one more time" />
+        <ValidationMessage For="() => _form.ConfirmPassword" />
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(_message))
+    {
+        <p class="auth-feedback" role="status">@_message</p>
+    }
+
+    <button class="auth-submit" type="submit" disabled="@_isSubmitting">
+        @(_isSubmitting ? "Creating account..." : "Create account")
+        <span aria-hidden="true">&#8594;</span>
+    </button>
+</EditForm>
+
+<p class="auth-switch">Already have an account? <a href="/login">Sign in</a></p>
+
+@code {
+    private readonly RegistrationForm _form = new();
+    private string? _message;
+    private bool _isSubmitting;
+
+    private async Task RegisterAsync()
+    {
+        _isSubmitting = true;
+        try
+        {
+            var result = await AuthenticationService.RegisterAsync(_form.Name, _form.Email, _form.Password);
+            _message = result.Message;
+        }
+        finally
+        {
+            _isSubmitting = false;
+        }
+    }
+
+    private sealed class RegistrationForm
+    {
+        [Required(ErrorMessage = "Add your name to continue.")]
+        [StringLength(100, ErrorMessage = "Names can be up to 100 characters.")]
+        public string Name { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Add your email address to continue.")]
+        [EmailAddress(ErrorMessage = "Enter a valid email address.")]
+        public string Email { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Choose a password to continue.")]
+        [MinLength(8, ErrorMessage = "Use at least 8 characters for your password.")]
+        public string Password { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Enter your password one more time.")]
+        [Compare(nameof(Password), ErrorMessage = "Those passwords don't match yet.")]
+        public string ConfirmPassword { get; set; } = string.Empty;
+    }
+}

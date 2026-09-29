@@ -1,0 +1,72 @@
+@page "/login"
+@layout AuthLayout
+@using System.ComponentModel.DataAnnotations
+@inject IAuthenticationService AuthenticationService
+
+<PageTitle>Sign in | Appointment Book</PageTitle>
+
+<div class="auth-heading">
+    <p class="form-eyebrow">Welcome back</p>
+    <h2>Sign in to your account</h2>
+    <p>Pick up where you left off and see what’s on your calendar.</p>
+</div>
+
+<EditForm Model="_form" OnValidSubmit="SignInAsync" FormName="login-form" class="auth-form">
+    <DataAnnotationsValidator />
+
+    <div class="field-group">
+        <label for="login-email">Email address</label>
+        <InputText id="login-email" class="form-control" @bind-Value="_form.Email" type="email" autocomplete="email" placeholder="you@example.com" />
+        <ValidationMessage For="() => _form.Email" />
+    </div>
+
+    <div class="field-group">
+        <div class="field-label-row">
+            <label for="login-password">Password</label>
+        </div>
+        <InputText id="login-password" class="form-control" @bind-Value="_form.Password" type="password" autocomplete="current-password" placeholder="Enter your password" />
+        <ValidationMessage For="() => _form.Password" />
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(_message))
+    {
+        <p class="auth-feedback" role="status">@_message</p>
+    }
+
+    <button class="auth-submit" type="submit" disabled="@_isSubmitting">
+        @(_isSubmitting ? "Signing in..." : "Sign in")
+        <span aria-hidden="true">&#8594;</span>
+    </button>
+</EditForm>
+
+<p class="auth-switch">New here? <a href="/register">Create an account</a></p>
+
+@code {
+    private readonly LoginForm _form = new();
+    private string? _message;
+    private bool _isSubmitting;
+
+    private async Task SignInAsync()
+    {
+        _isSubmitting = true;
+        try
+        {
+            var result = await AuthenticationService.LoginAsync(_form.Email, _form.Password);
+            _message = result.Message;
+        }
+        finally
+        {
+            _isSubmitting = false;
+        }
+    }
+
+    private sealed class LoginForm
+    {
+        [Required(ErrorMessage = "Add your email address to continue.")]
+        [EmailAddress(ErrorMessage = "Enter a valid email address.")]
+        public string Email { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Add your password to continue.")]
+        public string Password { get; set; } = string.Empty;
+    }
+}

@@ -1,0 +1,227 @@
+.auth-shell {
+    --ink: #1d3029;
+    --muted: #65736c;
+    --green: #315b49;
+    --line: #dce4dc;
+    display: grid;
+    min-height: 100vh;
+    grid-template-columns: minmax(300px, 0.9fr) minmax(420px, 1.1fr);
+    color: var(--ink);
+    background: #f7f8f4;
+}
+
+.auth-intro {
+    position: relative;
+    display: flex;
+    min-height: 100%;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+    padding: clamp(2rem, 5vw, 4.5rem);
+    color: #f7f8f4;
+    background-color: #294c3e;
+    background-image: repeating-linear-gradient(135deg, transparent 0 38px, rgb(255 255 255 / 3%) 39px 40px);
+}
+
+.auth-intro::after {
+    position: absolute;
+    right: -5rem;
+    bottom: 11%;
+    width: 18rem;
+    height: 18rem;
+    border: 1px solid rgb(255 255 255 / 12%);
+    border-radius: 50%;
+    content: "";
+    pointer-events: none;
+}
+
+.auth-brand {
+    z-index: 1;
+    display: inline-flex;
+    width: fit-content;
+    align-items: center;
+    gap: 0.75rem;
+    color: inherit;
+    font-size: 1rem;
+    font-weight: 650;
+    text-decoration: none;
+}
+
+.brand-mark {
+    display: grid;
+    width: 2.4rem;
+    aspect-ratio: 1;
+    place-items: center;
+    border: 1px solid rgb(255 255 255 / 45%);
+    border-radius: 0.7rem;
+    font-family: Georgia, serif;
+    font-size: 1.25rem;
+}
+
+.intro-copy {
+    z-index: 1;
+    width: min(100%, 29rem);
+    margin: 4rem 0;
+    animation: arrive 500ms ease-out both;
+}
+
+.eyebrow,
+.preview-label {
+    margin: 0 0 1rem;
+    color: #c3d3c1;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.intro-copy h1 {
+    max-width: 10ch;
+    margin: 0;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(2.8rem, 5vw, 4.6rem);
+    font-weight: 400;
+    line-height: 1.04;
+}
+
+.intro-description {
+    max-width: 24rem;
+    margin: 1.25rem 0 2rem;
+    color: #d7e1d8;
+    font-size: 1.05rem;
+    line-height: 1.65;
+}
+
+.appointment-preview {
+    position: relative;
+    display: flex;
+    max-width: 23rem;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border: 1px solid rgb(255 255 255 / 20%);
+    border-radius: 0.75rem;
+    background: rgb(255 255 255 / 7%);
+}
+
+.preview-date {
+    display: grid;
+    min-width: 3.25rem;
+    aspect-ratio: 1;
+    align-content: center;
+    justify-items: center;
+    border-radius: 0.5rem;
+    color: var(--ink);
+    background: #e6eadc;
+}
+
+.preview-date span {
+    font-size: 0.6rem;
+    font-weight: 700;
+}
+
+.preview-date strong {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 1.4rem;
+    line-height: 1.1;
+}
+
+.preview-details {
+    display: grid;
+    gap: 0.2rem;
+    font-size: 0.82rem;
+}
+
+.preview-details .preview-label {
+    margin: 0;
+    font-size: 0.58rem;
+}
+
+.preview-details > span:last-child {
+    color: #d7e1d8;
+}
+
+.preview-dot {
+    position: absolute;
+    top: 1.15rem;
+    right: 1.2rem;
+    width: 0.5rem;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: #e7a477;
+}
+
+.intro-footer {
+    z-index: 1;
+    margin: 0;
+    color: #c3d3c1;
+    font-size: 0.8rem;
+}
+
+.auth-main {
+    display: grid;
+    min-width: 0;
+    place-items: center;
+    padding: 3rem clamp(1.25rem, 6vw, 6rem);
+}
+
+.auth-content {
+    width: min(100%, 27rem);
+    animation: arrive 500ms 80ms ease-out both;
+}
+
+@keyframes arrive {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 760px) {
+    .auth-shell {
+        grid-template-columns: 1fr;
+    }
+
+    .auth-intro {
+        min-height: auto;
+        padding: 1.25rem 1.5rem;
+    }
+
+    .intro-copy {
+        margin: 2.25rem 0 1.5rem;
+    }
+
+    .intro-copy h1 {
+        max-width: 15ch;
+        font-size: 2.5rem;
+    }
+
+    .intro-description {
+        margin: 0.8rem 0 1.25rem;
+        font-size: 0.95rem;
+    }
+
+    .appointment-preview,
+    .intro-footer {
+        display: none;
+    }
+
+    .auth-main {
+        padding: 2.5rem 1.5rem 3rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+    }
+}
