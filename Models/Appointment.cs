@@ -2,17 +2,21 @@ namespace AppointmentBook.Models;
 
 public class Appointment
 {
-  public int Id { get; set; }
+    public int Id { get; set; }
 
-  public string Title { get; set; } = string.Empty;
+    public string Title { get; set; } = string.Empty;
 
-  public DateTime Date { get; set; }
+    public DateTime Date { get; set; }
 
-  public TimeSpan Time { get; set; }
+    public TimeSpan Time { get; set; }
 
-  public string Location { get; set; } = string.Empty;
+    public string Location { get; set; } = string.Empty;
 
-  public string Notes { get; set; } = string.Empty;
+    public string Notes { get; set; } = string.Empty;
 
-  public bool IsCompleted { get; set; }
+    public bool IsCompleted { get; set; }
+
+    public int UserId { get; set; }
+
+    public User? User { get; set; }
 }
