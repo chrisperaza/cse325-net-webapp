@@ -1,6 +1,8 @@
 using AppointmentBook.Components;
 using AppointmentBook.Data;
+using AppointmentBook.Services;
 using Microsoft.EntityFrameworkCore;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +13,8 @@ builder.Services.AddRazorComponents()
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(
         builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<AppointmentService>();
 
 var app = builder.Build();
 

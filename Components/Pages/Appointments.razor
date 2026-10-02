@@ -1,19 +1,22 @@
+@namespace AppointmentBook.Components
 @page "/appointments"
 
 <PageTitle>Appointments</PageTitle>
 
 <div class="container py-4">
-
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>Appointments</h1>
 
-        <button class="btn btn-primary">
+        <a class="btn btn-primary" href="/appointments/create">
             New Appointment
-        </button>
+        </a>
     </div>
 
     <div class="alert alert-info">
         No appointments available yet.
     </div>
-
 </div>
+
+@code {
+    // This component intentionally has no additional logic.
+}

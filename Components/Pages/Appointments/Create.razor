@@ -1,0 +1,137 @@
+@page "/appointments/create"
+
+@using AppointmentBook.Models
+@using AppointmentBook.Services
+
+@inject AppointmentService AppointmentService
+@inject NavigationManager Navigation
+
+<PageTitle>New Appointment</PageTitle>
+
+<div class="container py-4">
+  <div class="row">
+    <div class="col-md-8 col-lg-6 mx-auto">
+
+      <h1 class="mb-4">New Appointment</h1>
+
+      <EditForm Model="@appointmentInput" OnValidSubmit="@HandleValidSubmit">
+
+        <DataAnnotationsValidator />
+
+        <ValidationSummary />
+
+        <div class="mb-3">
+          <label for="title" class="form-label">
+            Title
+          </label>
+
+          <InputText id="title" class="form-control" @bind-Value="appointmentInput.Title" />
+
+          <ValidationMessage For="@(() => appointmentInput.Title)" />
+        </div>
+
+        <div class="mb-3">
+          <label for="date" class="form-label">
+            Date
+          </label>
+
+          <InputDate id="date" class="form-control" @bind-Value="appointmentInput.Date" />
+
+          <ValidationMessage For="@(() => appointmentInput.Date)" />
+        </div>
+
+        <div class="mb-3">
+          <label for="time" class="form-label">
+            Time
+          </label>
+
+          <input id="time" type="time" class="form-control" @bind="appointmentInput.Time" />
+
+          <ValidationMessage For="@(() => appointmentInput.Time)" />
+        </div>
+
+        <div class="mb-3">
+          <label for="location" class="form-label">
+            Location
+          </label>
+
+          <InputText id="location" class="form-control" @bind-Value="appointmentInput.Location" />
+
+          <ValidationMessage For="@(() => appointmentInput.Location)" />
+        </div>
+
+        <div class="mb-3">
+          <label for="notes" class="form-label">
+            Notes
+          </label>
+
+          <InputTextArea id="notes" class="form-control" @bind-Value="appointmentInput.Notes" />
+
+          <ValidationMessage For="@(() => appointmentInput.Notes)" />
+        </div>
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+          <div class="alert alert-danger">
+            @errorMessage
+          </div>
+        }
+
+        <div class="d-flex gap-2">
+
+          <button type="submit" class="btn btn-primary" disabled="@isSaving">
+            @(isSaving ? "Saving..." : "Create Appointment")
+          </button>
+
+          <button type="button" class="btn btn-secondary" @onclick="Cancel">
+            Cancel
+          </button>
+
+        </div>
+
+      </EditForm>
+
+    </div>
+  </div>
+</div>
+
+@code {
+  private AppointmentInputModel appointmentInput = new();
+
+  private bool isSaving;
+
+  private string? errorMessage;
+
+  private async Task HandleValidSubmit()
+  {
+    errorMessage = null;
+    isSaving = true;
+
+    try
+    {
+      // Temporary UserId.
+      // This will be replaced when authentication is integrated.
+      const int userId = 1;
+
+      await AppointmentService.CreateAsync(
+          appointmentInput,
+          userId);
+
+      Navigation.NavigateTo("/appointments");
+    }
+    catch
+    {
+      errorMessage =
+          "Unable to create the appointment. Please try again.";
+    }
+    finally
+    {
+      isSaving = false;
+    }
+  }
+
+  private void Cancel()
+  {
+    Navigation.NavigateTo("/appointments");
+  }
+}
