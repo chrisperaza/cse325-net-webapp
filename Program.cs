@@ -29,6 +29,7 @@ builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<AppointmentService>();
 
 var app = builder.Build();
 
