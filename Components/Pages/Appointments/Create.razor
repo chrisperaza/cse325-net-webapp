@@ -1,7 +1,10 @@
 @page "/appointments/create"
+@rendermode InteractiveServer
 
+@using System.Security.Claims
 @using AppointmentBook.Models
 @using AppointmentBook.Services
+@using Microsoft.AspNetCore.Components.Authorization
 
 @inject AppointmentService AppointmentService
 @inject NavigationManager Navigation
@@ -9,129 +12,114 @@
 <PageTitle>New Appointment</PageTitle>
 
 <div class="container py-4">
-  <div class="row">
-    <div class="col-md-8 col-lg-6 mx-auto">
+    <div class="row">
+        <div class="col-md-8 col-lg-6 mx-auto">
+            <h1 class="mb-4">New Appointment</h1>
 
-      <h1 class="mb-4">New Appointment</h1>
+            <EditForm Model="@appointmentInput" OnValidSubmit="@HandleValidSubmit" FormName="CreateAppointment">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
 
-      <EditForm Model="@appointmentInput" OnValidSubmit="@HandleValidSubmit" FormName="CreateAppointment">
+                <div class="mb-3">
+                    <label for="title" class="form-label">Title</label>
+                    <InputText id="title" class="form-control" @bind-Value="appointmentInput.Title" />
+                    <ValidationMessage For="@(() => appointmentInput.Title)" />
+                </div>
 
-        <DataAnnotationsValidator />
+                <div class="mb-3">
+                    <label for="date" class="form-label">Date</label>
+                    <InputDate id="date" class="form-control" @bind-Value="appointmentInput.Date" />
+                    <ValidationMessage For="@(() => appointmentInput.Date)" />
+                </div>
 
-        <ValidationSummary />
+                <div class="mb-3">
+                    <label for="time" class="form-label">Time</label>
+                    <input id="time" type="time" class="form-control" @bind="appointmentInput.Time" />
+                    <ValidationMessage For="@(() => appointmentInput.Time)" />
+                </div>
 
-        <div class="mb-3">
-          <label for="title" class="form-label">
-            Title
-          </label>
+                <div class="mb-3">
+                    <label for="location" class="form-label">Location</label>
+                    <InputText id="location" class="form-control" @bind-Value="appointmentInput.Location" />
+                    <ValidationMessage For="@(() => appointmentInput.Location)" />
+                </div>
 
-          <InputText id="title" class="form-control" @bind-Value="appointmentInput.Title" />
+                <div class="mb-3">
+                    <label for="notes" class="form-label">Notes</label>
+                    <InputTextArea id="notes" class="form-control" @bind-Value="appointmentInput.Notes" />
+                    <ValidationMessage For="@(() => appointmentInput.Notes)" />
+                </div>
 
-          <ValidationMessage For="@(() => appointmentInput.Title)" />
+                @if (!string.IsNullOrWhiteSpace(errorMessage))
+                {
+                    <div class="alert alert-danger" role="alert">
+                        @errorMessage
+                    </div>
+                }
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary" disabled="@isSaving">
+                        @(isSaving ? "Saving..." : "Create Appointment")
+                    </button>
+
+                    <button type="button" class="btn btn-secondary" @onclick="Cancel" disabled="@isSaving">
+                        Cancel
+                    </button>
+                </div>
+            </EditForm>
         </div>
-
-        <div class="mb-3">
-          <label for="date" class="form-label">
-            Date
-          </label>
-
-          <InputDate id="date" class="form-control" @bind-Value="appointmentInput.Date" />
-
-          <ValidationMessage For="@(() => appointmentInput.Date)" />
-        </div>
-
-        <div class="mb-3">
-          <label for="time" class="form-label">
-            Time
-          </label>
-
-          <input id="time" type="time" class="form-control" @bind="appointmentInput.Time" />
-
-          <ValidationMessage For="@(() => appointmentInput.Time)" />
-        </div>
-
-        <div class="mb-3">
-          <label for="location" class="form-label">
-            Location
-          </label>
-
-          <InputText id="location" class="form-control" @bind-Value="appointmentInput.Location" />
-
-          <ValidationMessage For="@(() => appointmentInput.Location)" />
-        </div>
-
-        <div class="mb-3">
-          <label for="notes" class="form-label">
-            Notes
-          </label>
-
-          <InputTextArea id="notes" class="form-control" @bind-Value="appointmentInput.Notes" />
-
-          <ValidationMessage For="@(() => appointmentInput.Notes)" />
-        </div>
-
-        @if (!string.IsNullOrEmpty(errorMessage))
-        {
-          <div class="alert alert-danger">
-            @errorMessage
-          </div>
-        }
-
-        <div class="d-flex gap-2">
-
-          <button type="submit" class="btn btn-primary" disabled="@isSaving">
-            @(isSaving ? "Saving..." : "Create Appointment")
-          </button>
-
-          <button type="button" class="btn btn-secondary" @onclick="Cancel">
-            Cancel
-          </button>
-
-        </div>
-
-      </EditForm>
-
     </div>
-  </div>
 </div>
 
 @code {
-  private AppointmentInputModel appointmentInput = new();
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
 
-  private bool isSaving;
+    private AppointmentInputModel appointmentInput = new();
 
-  private string? errorMessage;
+    private bool isSaving;
+    private string? errorMessage;
 
-  private async Task HandleValidSubmit()
-  {
-    errorMessage = null;
-    isSaving = true;
-
-    try
+    private async Task HandleValidSubmit()
     {
-      // Temporary UserId.
-      // This will be replaced when authentication is integrated.
-      const int userId = 1;
+        errorMessage = null;
+        isSaving = true;
 
-      await AppointmentService.CreateAsync(
-          appointmentInput,
-          userId);
+        try
+        {
+            var authState = await AuthenticationStateTask;
+            var user = authState.User;
 
-      Navigation.NavigateTo("/appointments");
+            if (user.Identity is null || !user.Identity.IsAuthenticated)
+            {
+                errorMessage = "You must be logged in to create an appointment.";
+                return;
+            }
+
+            var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (userIdClaim is null || !int.TryParse(userIdClaim.Value, out var userId))
+            {
+                errorMessage = "Unable to determine the current user.";
+                return;
+            }
+
+            await AppointmentService.CreateAsync(appointmentInput, userId);
+
+            Navigation.NavigateTo("/appointments");
+        }
+        catch
+        {
+            errorMessage = "Unable to create the appointment. Please try again.";
+        }
+        finally
+        {
+            isSaving = false;
+        }
     }
-    catch
+
+    private void Cancel()
     {
-      errorMessage =
-          "Unable to create the appointment. Please try again.";
+        Navigation.NavigateTo("/appointments");
     }
-    finally
-    {
-      isSaving = false;
-    }
-  }
-
-  private void Cancel()
-  {
-    Navigation.NavigateTo("/appointments");
-  }
 }
