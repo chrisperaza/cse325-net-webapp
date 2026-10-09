@@ -1,0 +1,56 @@
+@page "/appointments"
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using Microsoft.EntityFrameworkCore
+@using AppointmentBook.Models
+@using AppointmentBook.Data
+@implements IAsyncDisposable
+@inject IDbContextFactory<AppointmentBook.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+@attribute [Authorize]
+
+<PageTitle>Appointments</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>My Appointments</h1>
+
+    @* <p>
+        <a href="appointments/create">Create New</a>
+    </p> *@
+
+    <a class="btn btn-primary" href="/appointments/create">
+        New Appointment
+    </a>
+</div>
+
+@* The next block will be added soon *@
+@* <div class="alert alert-info">
+    No appointments available yet.
+</div> *@
+
+<QuickGrid Class="table" Items="context.Appointments">
+    <PropertyColumn Property="appointment => appointment.Title" />
+    <PropertyColumn Property="appointment => appointment.Date" />
+    <PropertyColumn Property="appointment => appointment.Time" />
+    <PropertyColumn Property="appointment => appointment.Location" />
+    <PropertyColumn Property="appointment => appointment.Notes" />
+    <PropertyColumn Property="appointment => appointment.IsCompleted" />
+    <PropertyColumn Property="appointment => appointment.UserId" />
+    <PropertyColumn Property="appointment => appointment.User" />
+
+    <TemplateColumn Context="appointment">
+        <a href="@($"appointments/edit?id={appointment.Id}")">Edit</a> |
+        <a href="@($"appointments/details?id={appointment.Id}")">Details</a> |
+        <a href="@($"appointments/delete?id={appointment.Id}")">Delete</a>
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    private ApplicationDbContext context = default!;
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}
