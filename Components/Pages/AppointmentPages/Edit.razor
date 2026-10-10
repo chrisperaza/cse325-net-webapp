@@ -1,0 +1,166 @@
+@page "/appointments/edit"
+@rendermode InteractiveServer
+@attribute [Authorize]
+
+@using System.Security.Claims
+@using AppointmentBook.Data
+@using AppointmentBook.Models
+@using AppointmentBook.Services
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.EntityFrameworkCore
+
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
+@inject AppointmentService AppointmentService
+@inject NavigationManager Navigation
+@inject ILogger<Edit> Logger
+
+<PageTitle>Edit Appointment</PageTitle>
+
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-8 col-lg-6 mx-auto">
+            <h1 class="mb-4">Edit Appointment</h1>
+
+            @if (appointmentInput is null)
+            {
+                <p><em>Loading...</em></p>
+            }
+            else
+            {
+                <EditForm Model="@appointmentInput" OnValidSubmit="@HandleValidSubmit" FormName="EditAppointment">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Title</label>
+                        <InputText id="title" class="form-control" @bind-Value="appointmentInput.Title" />
+                        <ValidationMessage For="@(() => appointmentInput.Title)" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="date" class="form-label">Date</label>
+                        <InputDate id="date" class="form-control" @bind-Value="appointmentInput.Date" />
+                        <ValidationMessage For="@(() => appointmentInput.Date)" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="time" class="form-label">Time</label>
+                        <input id="time" type="time" class="form-control" @bind="appointmentInput.Time" />
+                        <ValidationMessage For="@(() => appointmentInput.Time)" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="location" class="form-label">Location</label>
+                        <InputText id="location" class="form-control" @bind-Value="appointmentInput.Location" />
+                        <ValidationMessage For="@(() => appointmentInput.Location)" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Notes</label>
+                        <InputTextArea id="notes" class="form-control" @bind-Value="appointmentInput.Notes" />
+                        <ValidationMessage For="@(() => appointmentInput.Notes)" />
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(errorMessage))
+                    {
+                        <div class="alert alert-danger" role="alert">
+                            @errorMessage
+                        </div>
+                    }
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary" disabled="@isSaving">
+                            @(isSaving ? "Saving..." : "Save Changes")
+                        </button>
+
+                        <button type="button" class="btn btn-secondary" @onclick="Cancel" disabled="@isSaving">
+                            Cancel
+                        </button>
+                    </div>
+                </EditForm>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
+
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    private AppointmentInputModel? appointmentInput;
+    private int userId;
+    private bool isSaving;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateTask;
+        var userIdClaim = authState.User.FindFirst(ClaimTypes.NameIdentifier);
+
+        if (userIdClaim is null || !int.TryParse(userIdClaim.Value, out userId))
+        {
+            errorMessage = "Unable to determine the current user.";
+            return;
+        }
+
+        await using var context = await DbFactory.CreateDbContextAsync();
+        var appointment = await context.Appointments
+            .FirstOrDefaultAsync(appointment => appointment.Id == Id && appointment.UserId == userId);
+
+        if (appointment is null)
+        {
+            Navigation.NotFound();
+            return;
+        }
+
+        appointmentInput = new AppointmentInputModel
+        {
+            Title = appointment.Title,
+            Date = DateOnly.FromDateTime(appointment.Date),
+            Time = TimeOnly.FromTimeSpan(appointment.Time),
+            Location = appointment.Location,
+            Notes = appointment.Notes
+        };
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (appointmentInput is null)
+        {
+            return;
+        }
+
+        errorMessage = null;
+        isSaving = true;
+
+        try
+        {
+            var updated = await AppointmentService.UpdateAsync(appointmentInput, Id, userId);
+
+            if (!updated)
+            {
+                Navigation.NotFound();
+                return;
+            }
+
+            Navigation.NavigateTo($"/appointments/details?id={Id}");
+        }
+        catch (DbUpdateException exception)
+        {
+            Logger.LogError(exception, "Unable to update appointment {AppointmentId}.", Id);
+            errorMessage = "Unable to save the appointment. Please try again.";
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/appointments");
+    }
+}
