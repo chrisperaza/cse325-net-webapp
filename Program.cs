@@ -1,3 +1,4 @@
+using Microsoft.Data.Sqlite;
 using AppointmentBook.Components;
 using AppointmentBook.Data;
 using AppointmentBook.Models;
@@ -14,9 +15,23 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
-    options.UseSqlite(
-        builder.Configuration.GetConnectionString("DefaultConnection")));
+var connectionString = builder.Configuration
+    .GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException(
+        "DefaultConnection is not configured.");
+
+var sqliteConnection = new SqliteConnectionStringBuilder(
+    connectionString);
+
+if (!Path.IsPathRooted(sqliteConnection.DataSource))
+{
+    sqliteConnection.DataSource = Path.GetFullPath(
+        sqliteConnection.DataSource,
+        builder.Environment.ContentRootPath);
+}
+
+builder.Services.AddDbContextFactory<ApplicationDbContext>(
+    options => options.UseSqlite(sqliteConnection.ToString()));
 
 builder.Services.AddQuickGridEntityFrameworkAdapter();
 

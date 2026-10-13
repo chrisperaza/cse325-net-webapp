@@ -1,0 +1,101 @@
+
+name: Deploy AppointmentBook to Somee
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: appointmentbook-somee-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore AppointmentBook.csproj
+
+      - name: Publish application
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          PUBLISH_DIR="$RUNNER_TEMP/appointmentbook-publish"
+          rm -rf "$PUBLISH_DIR"
+
+          dotnet publish AppointmentBook.csproj \
+            --configuration Release \
+            --no-restore \
+            --output "$PUBLISH_DIR"
+
+          rm -f "$PUBLISH_DIR/appsettings.Development.json"
+
+          if find "$PUBLISH_DIR" -type f \
+            \( -name '*.db' \
+            -o -name '*.sqlite' \
+            -o -name '*.sqlite3' \
+            -o -name '*.backup' \) \
+            | grep -q .; then
+            echo "ERROR: Database file found in publish output."
+            exit 1
+          fi
+
+          test -f "$PUBLISH_DIR/AppointmentBook.dll"
+          test -f "$PUBLISH_DIR/web.config"
+          test -d "$PUBLISH_DIR/wwwroot"
+
+      - name: Install lftp
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lftp
+
+      - name: Deploy to Somee
+        shell: bash
+        env:
+          SOMEE_FTP_HOST: ${{ secrets.SOMEE_FTP_HOST }}
+          SOMEE_FTP_USERNAME: ${{ secrets.SOMEE_FTP_USERNAME }}
+          SOMEE_FTP_PASSWORD: ${{ secrets.SOMEE_FTP_PASSWORD }}
+          SOMEE_FTP_REMOTE_DIR: ${{ secrets.SOMEE_FTP_REMOTE_DIR }}
+        run: |
+          set -euo pipefail
+
+          PUBLISH_DIR="$RUNNER_TEMP/appointmentbook-publish"
+
+          test -n "$SOMEE_FTP_HOST"
+          test -n "$SOMEE_FTP_USERNAME"
+          test -n "$SOMEE_FTP_PASSWORD"
+          test -n "$SOMEE_FTP_REMOTE_DIR"
+
+          lftp -u "$SOMEE_FTP_USERNAME","$SOMEE_FTP_PASSWORD" \
+            "$SOMEE_FTP_HOST" <<EOF
+          set ftp:ssl-allow no
+          set ftp:passive-mode yes
+          set net:max-retries 2
+          set net:timeout 30
+
+          mirror --reverse --verbose \
+            --no-perms --no-umask \
+            --exclude-glob '*.db' \
+            --exclude-glob '*.sqlite' \
+            --exclude-glob '*.sqlite3' \
+            --exclude-glob '*.backup' \
+            --exclude-glob 'logs/**' \
+            "$PUBLISH_DIR" "$SOMEE_FTP_REMOTE_DIR"
+
+          bye
+          EOF
