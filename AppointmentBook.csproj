@@ -1,3 +1,10 @@
+<ItemGroup>
+  <Content Remove="appointmentbook.db" />
+  <None Remove="appointmentbook.db" />
+  <Content Remove="**/appointmentbook.db" />
+  <None Remove="**/appointmentbook.db" />
+</ItemGroup>
+
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
